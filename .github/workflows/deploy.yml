@@ -31,9 +31,11 @@ jobs:
         run: terraform validate
 
       - name: 📊 Terraform Plan
-        run: terraform plan
+        run: |
+            terraform plan \
+            -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}"
 
       - name: 🚀 Terraform Apply
-        run: terraform apply -auto-approve
-        env:
-          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+            terraform apply -auto-approve \
+            -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}"
