@@ -1,5 +1,15 @@
 provider "aws" {
-  region = "eu-west-1" # You can adjust this to your preferred AWS region
+  region = "eu-west-1"
+}
+
+terraform {
+  backend "s3" {
+    bucket         = "findora-terraform-state"
+    key            = "infrastructure/terraform.tfstate"
+    region         = "eu-west-1"
+    dynamodb_table = "findora-terraform-locks"
+    encrypt        = true
+  }
 }
 
 module "feedback" { 
