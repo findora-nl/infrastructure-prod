@@ -13,16 +13,18 @@ jobs:
     steps:
       - name: ⬇️ Checkout infrastructure repo
         uses: actions/checkout@v3
+        with:
+            path: infrastructure
         
       - name: ⬇️ Checkout Core Repo
         uses: actions/checkout@v3
         with:
             repository: findora-nl/core
-            path: ../core
+            path: core
             token: ${{ secrets.CORE_REPO_PAT }}
 
       - name: 📦 Install and Build Lambda
-        working-directory: ../core
+        working-directory: core
         run: |
           npm ci
           npm run build-lambda
@@ -41,17 +43,21 @@ jobs:
           aws-region: eu-west-1
 
       - name: 📂 Terraform Init
+        working-directory: infrastructure
         run: terraform init
 
       - name: 🧪 Terraform Validate
+        working-directory: infrastructure
         run: terraform validate
 
       - name: 📊 Terraform Plan
+        working-directory: infrastructure
         run: |
             terraform plan \
             -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}"
 
       - name: 🚀 Terraform Apply
+        working-directory: infrastructure
         run: |
             terraform apply -auto-approve \
             -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}"
