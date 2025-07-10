@@ -18,8 +18,17 @@ jobs:
         uses: actions/checkout@v3
         with:
             repository: findora-nl/core
-            path: core
+            path: ../core
             token: ${{ secrets.CORE_REPO_PAT }}
+
+      - name: 📦 Install and Build Lambda
+        working-directory: ../core
+        run: |
+          npm ci
+          npm run build-lambda
+          mkdir -p dist
+          cd dist
+          zip lambda.zip lambda.js
 
       - name: ⚙️ Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -36,15 +45,6 @@ jobs:
 
       - name: 🧪 Terraform Validate
         run: terraform validate
-
-      - name: 📦 Install and Build Lambda
-        working-directory: core
-        run: |
-          npm ci
-          npm run build-lambda
-          mkdir -p dist
-          cd dist
-          zip lambda.zip lambda.js
 
       - name: 📊 Terraform Plan
         run: |
