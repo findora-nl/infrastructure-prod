@@ -26,11 +26,7 @@ jobs:
       - name: 📦 Install and Build Lambda
         working-directory: core
         run: |
-          npm ci
-          npm run build-lambda
-          mkdir -p dist
-          cd dist
-          zip lambda.zip lambda.js
+          make package
 
       - name: ⚙️ Setup Terraform
         uses: hashicorp/setup-terraform@v2
