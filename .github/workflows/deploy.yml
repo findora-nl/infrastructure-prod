@@ -25,6 +25,34 @@ jobs:
             path: core
             token: ${{ secrets.CORE_REPO_PAT }}
 
+      - name: ⬇️ Checkout UI Repo
+        uses: actions/checkout@v3
+        with:
+            repository: findora-nl/ui
+            path: ui
+            token: ${{ secrets.CORE_REPO_PAT }}
+
+      - name: 🧰 Install UI Dependencies
+        working-directory: ui
+        run: npm ci
+
+      - name: 🛠 Build UI
+        working-directory: ui
+        run: npm run build
+
+      - name: 🔧 Ensure S3 Bucket Website Configuration
+        run: |
+          aws s3api put-bucket-website --bucket findora-ui-prod --website-configuration '{
+            "IndexDocument": { "Suffix": "index.html" },
+            "ErrorDocument": { "Key": "index.html" }
+          }'
+
+      - name: 🚀 Deploy UI to S3
+        run: |
+          aws s3 sync ui/dist s3://findora-ui-prod --delete \
+            --cache-control "max-age=0,no-cache,no-store,must-revalidate" \
+            --content-type "text/html"
+
       - name: 📦 Install and Build Lambda
         working-directory: core
         run: |
