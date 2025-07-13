@@ -21,14 +21,14 @@ resource "aws_route53_zone" "main" {
   name = "findora.nl"
 }
 
-module "feedback" { 
+module "feedback" {
   source = "./modules/feedback"
 }
 
 module "lambda_core" {
-  source             = "./modules/lambda-core"
+  source              = "./modules/lambda-core"
   lambda_package_path = "../core/dist/lambda.zip"
-  openai_api_key     = var.openai_api_key
+  openai_api_key      = var.openai_api_key
 }
 
 # S3 bucket for UI hosting
