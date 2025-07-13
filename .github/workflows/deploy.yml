@@ -6,7 +6,7 @@ on:
       - main
   workflow_dispatch:
   repository_dispatch:
-    types: [redeploy]
+    types: [core-redeploy, ui-redeploy]
 
 jobs:
   deploy:
