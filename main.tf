@@ -191,7 +191,7 @@ resource "null_resource" "upload_ui" {
   }
 
   triggers = {
-    always_run = timestamp()
+    ui_hash = filesha256("../ui/dist/index.html")
   }
 
   depends_on = [aws_s3_bucket.ui_bucket]
