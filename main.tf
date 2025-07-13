@@ -76,14 +76,14 @@ resource "aws_s3_bucket_policy" "ui_bucket_policy" {
   bucket = aws_s3_bucket.ui_bucket.id
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
-        Sid       = "PublicReadGetObject"
-        Effect    = "Allow"
-        Principal = "*"
-        Action    = ["s3:GetObject"]
-        Resource  = ["${aws_s3_bucket.ui_bucket.arn}/*"]
+        Sid       = "PublicReadGetObject",
+        Effect    = "Allow",
+        Principal = "*",
+        Action    = ["s3:GetObject"],
+        Resource  = "${aws_s3_bucket.ui_bucket.arn}/*"
       }
     ]
   })
@@ -124,11 +124,11 @@ resource "aws_route53_record" "findora_cert_validation" {
   records = [each.value.record]
 }
 
-# resource "aws_acm_certificate_validation" "cert_validation" {
-#   provider                = aws.us-east-1
-#   certificate_arn         = aws_acm_certificate.cert.arn
-#   validation_record_fqdns = [for record in aws_route53_record.findora_cert_validation : record.fqdn]
-# }
+resource "aws_acm_certificate_validation" "cert_validation" {
+  provider                = aws.us-east-1
+  certificate_arn         = aws_acm_certificate.cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.findora_cert_validation : record.fqdn]
+}
 
 # CloudFront distribution
 resource "aws_cloudfront_distribution" "cdn" {
@@ -146,7 +146,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   comment             = "Findora UI CDN"
   default_root_object = "index.html"
 
-  # aliases = ["findora.nl", "www.findora.nl"]
+  aliases = ["findora.nl", "www.findora.nl"]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
@@ -166,7 +166,9 @@ resource "aws_cloudfront_distribution" "cdn" {
   price_class = "PriceClass_100"
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn      = aws_acm_certificate.cert.arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
   restrictions {
@@ -179,5 +181,70 @@ resource "aws_cloudfront_distribution" "cdn" {
     Name = "Findora CDN"
   }
 
-  # depends_on = [aws_acm_certificate_validation.cert_validation]
+  depends_on = [aws_acm_certificate_validation.cert_validation]
+}
+
+# Upload UI build to S3 bucket
+resource "null_resource" "upload_ui" {
+  provisioner "local-exec" {
+    command = "aws s3 sync ../ui/dist/ s3://${aws_s3_bucket.ui_bucket.id} --delete"
+  }
+
+  triggers = {
+    always_run = timestamp()
+  }
+
+  depends_on = [aws_s3_bucket.ui_bucket]
+}
+# Root domain A record pointing to CloudFront
+resource "aws_route53_record" "findora_root_a" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "findora.nl"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.cdn.domain_name
+    zone_id                = aws_cloudfront_distribution.cdn.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# www subdomain A record pointing to CloudFront
+resource "aws_route53_record" "findora_www_a" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "www.findora.nl"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.cdn.domain_name
+    zone_id                = aws_cloudfront_distribution.cdn.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# MX record for Google mail
+resource "aws_route53_record" "mx_google" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "findora.nl"
+  type    = "MX"
+  ttl     = 300
+  records = ["1 SMTP.GOOGLE.COM."]
+}
+
+# Google site verification TXT record (DMARC placeholder)
+resource "aws_route53_record" "google_site_verification" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "_dmarc.findora.nl"
+  type    = "TXT"
+  ttl     = 300
+  records = ["google-site-verification=ICfkcNHkDkRqXmQQjmUQDL1VChjbUGENlQ3Tqj_PIlQ"]
+}
+
+# Google hosted verification CNAME
+resource "aws_route53_record" "google_hosted_verification" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "lz64adi3tzif.findora.nl"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["gv-24z3wo275swgiv.dv.googlehosted.com."]
 }
