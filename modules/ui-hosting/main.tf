@@ -4,7 +4,7 @@ provider "aws" {
 }
 
 resource "aws_acm_certificate" "cert" {
-  provider = aws.us_east_1
+  provider          = aws.us_east_1
   domain_name       = var.domain
   validation_method = "DNS"
 
@@ -20,10 +20,10 @@ resource "aws_route53_zone" "main" {
 }
 
 resource "aws_acm_certificate_validation" "cert_validation" {
-  provider = aws.us_east_1
+  provider                = aws.us_east_1
   certificate_arn         = aws_acm_certificate.cert.arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
-  
+
   lifecycle {
     create_before_destroy = true
   }
@@ -46,7 +46,7 @@ resource "aws_route53_record" "cert_validation" {
 }
 
 resource "aws_s3_bucket" "ui_bucket" {
-  bucket = var.domain
+  bucket        = var.domain
   force_destroy = true
 }
 
@@ -58,7 +58,7 @@ resource "aws_s3_bucket_ownership_controls" "ui_ownership" {
 }
 
 resource "aws_s3_bucket_public_access_block" "ui_public_access" {
-  bucket = aws_s3_bucket.ui_bucket.id
+  bucket                  = aws_s3_bucket.ui_bucket.id
   block_public_acls       = false
   block_public_policy     = false
   ignore_public_acls      = false
@@ -105,9 +105,9 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   default_cache_behavior {
-    target_origin_id = "S3-${var.domain}"
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
+    target_origin_id       = "S3-${var.domain}"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
     viewer_protocol_policy = "redirect-to-https"
 
     forwarded_values {
@@ -125,9 +125,9 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   viewer_certificate {
-    acm_certificate_arn            = aws_acm_certificate.cert.arn
-    ssl_support_method             = "sni-only"
-    minimum_protocol_version       = "TLSv1.2_2021"
+    acm_certificate_arn      = aws_acm_certificate.cert.arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
   aliases = [var.domain, var.alt_domain]

@@ -14,4 +14,6 @@ install: venv
 pre-commit: install
 	@echo "🔍 Setting up pre-commit hooks..."
 	$(VENV_DIR)/bin/pre-commit install
-	
+
+run-pre-commit:
+	. $(VENV_DIR)/bin/activate && pre-commit run --all-files

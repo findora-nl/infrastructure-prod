@@ -1,5 +1,8 @@
 repos:
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.77.0
+    rev: v1.77.0  # 👈 a safe version
     hooks:
       - id: terraform_fmt
+        exclude: "^\\.terraform/"
+      - id: terraform_validate
+        exclude: "^\\.terraform/"
