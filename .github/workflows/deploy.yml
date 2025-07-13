@@ -42,20 +42,20 @@ jobs:
 
       - name: 🔧 Ensure S3 Bucket Website Configuration
         run: |
-          aws s3api put-bucket-website --bucket findora-ui-prod --website-configuration '{
+          aws s3api put-bucket-website --bucket findora.nl --website-configuration '{
             "IndexDocument": { "Suffix": "index.html" },
             "ErrorDocument": { "Key": "index.html" }
           }'
 
       - name: 🚀 Deploy UI to S3
         run: |
-          aws s3 sync ui/dist s3://findora-ui-prod --delete \
-            --cache-control "max-age=0,no-cache,no-store,must-revalidate" \
-            --content-type "text/html"
+          aws s3 sync ui/dist s3://findora.nl --delete \
+            --cache-control "max-age=0,no-cache,no-store,must-revalidate"
 
       - name: 📦 Install and Build Lambda
         working-directory: core
         run: |
+          npm ci
           make package
 
       - name: ⚙️ Setup Terraform
@@ -71,6 +71,10 @@ jobs:
       - name: 📂 Terraform Init
         working-directory: infrastructure
         run: terraform init
+
+      - name: 🧹 Terraform Format Check
+        working-directory: infrastructure
+        run: terraform fmt -check
 
       - name: 🧪 Terraform Validate
         working-directory: infrastructure
