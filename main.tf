@@ -183,6 +183,10 @@ resource "aws_cloudfront_distribution" "cdn" {
     Name = "Findora CDN"
   }
 
+  lifecycle {
+    ignore_changes = [origin]
+  }
+
   depends_on = [aws_acm_certificate_validation.cert_validation]
 }
 
