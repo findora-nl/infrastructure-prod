@@ -30,7 +30,7 @@ jobs:
         with:
             repository: findora-nl/ui
             path: ui
-            token: ${{ secrets.CORE_REPO_PAT }}
+            token: ${{ secrets.UI_REPO_PAT }}
 
       - name: 🧰 Install UI Dependencies
         working-directory: ui
