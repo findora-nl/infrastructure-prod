@@ -4,5 +4,6 @@ repos:
     hooks:
       - id: terraform_fmt
         exclude: "^\\.terraform/"
+        pass_filenames: false
       - id: terraform_validate
         exclude: "^\\.terraform/"

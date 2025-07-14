@@ -8,6 +8,11 @@ variable "alt_domain" {
   type        = string
 }
 
+variable "route53_zone_id" {
+  description = "ID of the shared Route53 hosted zone"
+  type        = string
+}
+
 variable "cdn_alias" {
   description = "CloudFront domain name used as alias target"
   type        = string

@@ -15,10 +15,6 @@ output "cdn_distribution_id" {
   value = aws_cloudfront_distribution.cdn.id
 }
 
-output "zone_id" {
-  value = aws_route53_zone.main.zone_id
-}
-
 output "bucket_name" {
   value = aws_s3_bucket.ui_bucket.bucket
 }

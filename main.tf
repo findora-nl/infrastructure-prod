@@ -17,6 +17,11 @@ terraform {
   }
 }
 
+# Main Route53 hosted zone for the domain
+resource "aws_route53_zone" "main" {
+  name = "findora.nl"
+}
+
 module "feedback" {
   source = "./modules/feedback"
 }
@@ -28,9 +33,10 @@ module "lambda_core" {
 }
 
 module "ui_hosting" {
-  source     = "./modules/ui-hosting"
-  domain     = "findora.nl"
-  alt_domain = "www.findora.nl"
+  source          = "./modules/ui-hosting"
+  domain          = "findora.nl"
+  alt_domain      = "www.findora.nl"
+  route53_zone_id = aws_route53_zone.main.zone_id
 }
 
 module "dns" {
@@ -42,4 +48,5 @@ module "dns" {
   google_verification_txt = "google-site-verification=ICfkcNHkDkRqXmQQjmUQDL1VChjbUGENlQ3Tqj_PIlQ"
   cname_name              = "lz64adi3tzif"
   cname_value             = "gv-24z3wo275swgiv.dv.googlehosted.com."
+  route53_zone_id         = aws_route53_zone.main.zone_id
 }

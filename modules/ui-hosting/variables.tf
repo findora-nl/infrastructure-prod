@@ -8,6 +8,11 @@ variable "alt_domain" {
   type        = string
 }
 
+variable "route53_zone_id" {
+  description = "ID of the shared Route53 hosted zone"
+  type        = string
+}
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)
