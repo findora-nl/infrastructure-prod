@@ -2,10 +2,12 @@ data "aws_cloudfront_distribution" "cdn" {
   id = var.cdn_distribution_id
 }
 
+# Main Route53 hosted zone for the domain
 resource "aws_route53_zone" "main" {
   name = var.domain
 }
 
+# A record for the root domain using a CloudFront alias
 resource "aws_route53_record" "findora_root_a" {
   zone_id = aws_route53_zone.main.zone_id
   name    = var.domain
@@ -18,6 +20,7 @@ resource "aws_route53_record" "findora_root_a" {
   }
 }
 
+# A record for the www subdomain using the same CloudFront alias
 resource "aws_route53_record" "findora_www_a" {
   zone_id = aws_route53_zone.main.zone_id
   name    = var.alt_domain
@@ -30,14 +33,16 @@ resource "aws_route53_record" "findora_www_a" {
   }
 }
 
-resource "aws_route53_record" "google_site_verification" {
+# SPF TXT record for Google Workspace email sending policy
+resource "aws_route53_record" "spf" {
   zone_id = aws_route53_zone.main.zone_id
-  name    = "_dmarc"
+  name    = var.domain
   type    = "TXT"
   ttl     = 300
-  records = [var.google_verification_txt]
+  records = ["v=spf1 include:_spf.google.com ~all"]
 }
 
+# Google-hosted verification CNAME record for domain verification
 resource "aws_route53_record" "google_hosted_verification" {
   zone_id = aws_route53_zone.main.zone_id
   name    = var.cname_name
@@ -46,6 +51,7 @@ resource "aws_route53_record" "google_hosted_verification" {
   records = [var.cname_value]
 }
 
+# MX record to route email to Google Workspace mail servers
 resource "aws_route53_record" "mx_google" {
   zone_id = aws_route53_zone.main.zone_id
   name    = var.domain
