@@ -68,14 +68,13 @@ jobs:
       - name: ⚙️ Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
-
       - name: 📂 Terraform Init
         working-directory: infrastructure
         run: terraform init
 
       - name: 🧹 Terraform Format Check
         working-directory: infrastructure
-        run: terraform fmt -check
+        run: terraform fmt -check -recursive
 
       - name: 🧪 Terraform Validate
         working-directory: infrastructure
