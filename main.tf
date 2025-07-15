@@ -30,8 +30,8 @@ module "lambda_core" {
   source              = "./modules/lambda-core"
   lambda_package_path = "../core/dist/lambda.zip"
   openai_api_key      = var.openai_api_key
-  domain         = "findora.nl"
-  api_cert_arn   = module.ui_hosting.certificate_arn
+  domain              = "findora.nl"
+  api_cert_arn        = module.ui_hosting.certificate_arn
 }
 
 module "ui_hosting" {
@@ -42,15 +42,15 @@ module "ui_hosting" {
 }
 
 module "dns" {
-  source                  = "./modules/dns"
-  domain                  = "findora.nl"
-  alt_domain              = "www.findora.nl"
-  cdn_alias               = module.ui_hosting.cdn_alias
-  cdn_distribution_id     = module.ui_hosting.cdn_distribution_id
-  google_verification_txt = "google-site-verification=ICfkcNHkDkRqXmQQjmUQDL1VChjbUGENlQ3Tqj_PIlQ"
-  cname_name              = "lz64adi3tzif"
-  cname_value             = "gv-24z3wo275swgiv.dv.googlehosted.com."
-  route53_zone_id         = aws_route53_zone.main.zone_id
-  api_gateway_domain_name   = module.lambda_core.api_gateway_domain_name
+  source                     = "./modules/dns"
+  domain                     = "findora.nl"
+  alt_domain                 = "www.findora.nl"
+  cdn_alias                  = module.ui_hosting.cdn_alias
+  cdn_distribution_id        = module.ui_hosting.cdn_distribution_id
+  google_verification_txt    = "google-site-verification=ICfkcNHkDkRqXmQQjmUQDL1VChjbUGENlQ3Tqj_PIlQ"
+  cname_name                 = "lz64adi3tzif"
+  cname_value                = "gv-24z3wo275swgiv.dv.googlehosted.com."
+  route53_zone_id            = aws_route53_zone.main.zone_id
+  api_gateway_domain_name    = module.lambda_core.api_gateway_domain_name
   api_gateway_hosted_zone_id = module.lambda_core.api_gateway_hosted_zone_id
 }

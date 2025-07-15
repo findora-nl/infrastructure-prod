@@ -1,9 +1,13 @@
 repos:
-  - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.77.0  # 👈 a safe version
+  - repo: local
     hooks:
-      - id: terraform_fmt
-        exclude: "^\\.terraform/"
-        pass_filenames: false
+      - id: terraform-fmt-recursive
+        name: Terraform Format Recursive
+        entry: ./terraform-fmt.sh
+        language: script
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.77.0
+    hooks:
       - id: terraform_validate
         exclude: "^\\.terraform/"
+        always_run: true

@@ -4,7 +4,7 @@ output "cloudfront_domain_name" {
 }
 
 output "certificate_arn" {
-  value = aws_acm_certificate.cert.arn
+  value      = aws_acm_certificate.cert.arn
   depends_on = [aws_acm_certificate_validation.cert_validation]
 }
 
