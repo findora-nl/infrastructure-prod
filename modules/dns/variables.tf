@@ -37,3 +37,13 @@ variable "cname_value" {
   description = "Target value for Google verification CNAME"
   type        = string
 }
+
+variable "api_gateway_domain_name" {
+  description = "API Gateway custom domain target"
+  type        = string
+}
+
+variable "api_gateway_hosted_zone_id" {
+  description = "API Gateway's associated hosted zone ID"
+  type        = string
+}

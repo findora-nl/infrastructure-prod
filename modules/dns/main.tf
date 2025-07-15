@@ -54,3 +54,17 @@ resource "aws_route53_record" "mx_google" {
   ttl     = 300
   records = ["1 SMTP.GOOGLE.COM."]
 }
+
+# Alias A record to route api.findora.nl to the API Gateway custom domain.
+# Ensures frontend can communicate with backend using a clean subdomain.
+resource "aws_route53_record" "api_domain" {
+  zone_id = var.route53_zone_id
+  name    = "api.${var.domain}"
+  type    = "A"
+
+  alias {
+    name                   = var.api_gateway_domain_name
+    zone_id                = var.api_gateway_hosted_zone_id
+    evaluate_target_health = false
+  }
+}

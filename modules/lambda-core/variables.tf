@@ -8,3 +8,12 @@ variable "openai_api_key" {
   type        = string
   sensitive   = true
 }
+variable "domain" {
+  description = "Base domain name for the API (e.g., findora.nl)"
+  type        = string
+}
+
+variable "api_cert_arn" {
+  description = "ARN of the ACM certificate for the API Gateway domain"
+  type        = string
+}
