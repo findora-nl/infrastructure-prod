@@ -14,6 +14,6 @@ variable "domain" {
 }
 
 variable "api_cert_arn" {
-  description = "ARN of the ACM certificate for the API Gateway domain"
+  description = "ARN of the regional ACM certificate for API Gateway"
   type        = string
 }

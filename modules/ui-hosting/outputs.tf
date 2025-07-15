@@ -3,9 +3,14 @@ output "cloudfront_domain_name" {
   value       = aws_cloudfront_distribution.cdn.domain_name
 }
 
-output "certificate_arn" {
-  value      = aws_acm_certificate.cert.arn
-  depends_on = [aws_acm_certificate_validation.cert_validation]
+output "cloudfront_certificate_arn" {
+  value       = aws_acm_certificate_validation.cert_validation.certificate_arn
+  description = "Certificate in us-east-1 for CloudFront"
+}
+
+output "regional_certificate_arn" {
+  value       = aws_acm_certificate_validation.cert_regional_validation.certificate_arn
+  description = "Certificate in eu-west-1 for API Gateway"
 }
 
 output "cdn_alias" {

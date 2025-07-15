@@ -31,7 +31,7 @@ module "lambda_core" {
   lambda_package_path = "../core/dist/lambda.zip"
   openai_api_key      = var.openai_api_key
   domain              = "findora.nl"
-  api_cert_arn        = module.ui_hosting.certificate_arn
+  api_cert_arn        = module.ui_hosting.regional_certificate_arn
 }
 
 module "ui_hosting" {
