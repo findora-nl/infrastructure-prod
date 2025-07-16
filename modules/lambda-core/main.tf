@@ -1,4 +1,4 @@
-# IAM role for Lambda to allow execution with necessary trust policy
+# IAM Role for Lambda Execution
 resource "aws_iam_role" "lambda_exec" {
   name = "findora-core-lambda-role"
   assume_role_policy = jsonencode({
@@ -13,13 +13,13 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
-# Attach AWS basic execution policy to the Lambda role for logging, etc.
+# Attach basic execution role for logging
 resource "aws_iam_role_policy_attachment" "lambda_basic" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Core Lambda function that runs the backend logic for the API
+# Lambda Function
 resource "aws_lambda_function" "core" {
   function_name    = "findora-core"
   role             = aws_iam_role.lambda_exec.arn
@@ -28,6 +28,7 @@ resource "aws_lambda_function" "core" {
   filename         = var.lambda_package_path
   source_code_hash = filebase64sha256(var.lambda_package_path)
   timeout          = 10
+
   environment {
     variables = {
       OPENAI_API_KEY = var.openai_api_key
@@ -35,13 +36,13 @@ resource "aws_lambda_function" "core" {
   }
 }
 
-# Create an HTTP API Gateway to expose the Lambda function via RESTful HTTP
+# API Gateway
 resource "aws_apigatewayv2_api" "http_api" {
   name          = "findora-api"
   protocol_type = "HTTP"
 }
 
-# Integrate API Gateway with the Lambda function using AWS_PROXY for full request/response handling
+# Lambda Integration for API Gateway
 resource "aws_apigatewayv2_integration" "lambda_integration" {
   api_id                 = aws_apigatewayv2_api.http_api.id
   integration_type       = "AWS_PROXY"
@@ -50,22 +51,32 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
   payload_format_version = "2.0"
 }
 
-# Route all requests (ANY method, any path) through the API Gateway to the Lambda integration
+# API Route
 resource "aws_apigatewayv2_route" "default_route" {
   api_id    = aws_apigatewayv2_api.http_api.id
   route_key = "ANY /{proxy+}"
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
 
+# CloudWatch Log Group for API Gateway
+resource "aws_cloudwatch_log_group" "apigw_logs" {
+  name              = "/aws/apigateway/findora-api"
+  retention_in_days = 14
+}
 
-# Default stage for the API, auto-deployed with each change
+# API Stage with Access Logs
 resource "aws_apigatewayv2_stage" "default_stage" {
   api_id      = aws_apigatewayv2_api.http_api.id
   name        = "$default"
   auto_deploy = true
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.apigw_logs.arn
+    format          = "requestId: $context.requestId, routeKey: $context.routeKey, status: $context.status, integrationStatus: $context.integrationStatus"
+  }
 }
 
-# Permission for API Gateway to invoke the Lambda function
+# Lambda permission for API Gateway
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
@@ -74,9 +85,10 @@ resource "aws_lambda_permission" "apigw" {
   source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"
 }
 
-# Custom domain mapping for API Gateway (e.g. api.findora.nl) with TLS certificate
+# Custom Domain for API Gateway
 resource "aws_apigatewayv2_domain_name" "api" {
   domain_name = "api.${var.domain}"
+
   domain_name_configuration {
     certificate_arn = var.api_cert_arn
     endpoint_type   = "REGIONAL"
@@ -84,7 +96,7 @@ resource "aws_apigatewayv2_domain_name" "api" {
   }
 }
 
-# Map the custom domain and default stage to the API Gateway
+# API Mapping to custom domain
 resource "aws_apigatewayv2_api_mapping" "api_map" {
   api_id      = aws_apigatewayv2_api.http_api.id
   domain_name = aws_apigatewayv2_domain_name.api.id
