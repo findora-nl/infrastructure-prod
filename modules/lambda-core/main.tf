@@ -1,6 +1,6 @@
 # IAM Role for Lambda Execution
 resource "aws_iam_role" "lambda_exec" {
-  name = "findora-core-lambda-role"
+  name = "${replace(var.domain, ".", "-")}-core-lambda-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
@@ -21,7 +21,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
 
 # Lambda Function
 resource "aws_lambda_function" "core" {
-  function_name    = "findora-core"
+  function_name    = "${replace(var.domain, ".", "-")}-core"
   role             = aws_iam_role.lambda_exec.arn
   handler          = "index.handler"
   runtime          = "nodejs18.x"
@@ -60,7 +60,7 @@ resource "aws_apigatewayv2_route" "default_route" {
 
 # CloudWatch Log Group for API Gateway
 resource "aws_cloudwatch_log_group" "apigw_logs" {
-  name              = "/aws/apigateway/findora-api"
+  name              = "/aws/apigateway/${replace(var.domain, ".", "-")}-api"
   retention_in_days = 14
 }
 

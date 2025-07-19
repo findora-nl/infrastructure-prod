@@ -28,33 +28,6 @@ resource "aws_route53_record" "findora_www_a" {
   }
 }
 
-# SPF TXT record for Google Workspace email sending policy
-resource "aws_route53_record" "spf" {
-  zone_id = var.route53_zone_id
-  name    = var.domain
-  type    = "TXT"
-  ttl     = 300
-  records = ["v=spf1 include:_spf.google.com ~all"]
-}
-
-# Google-hosted verification CNAME record for domain verification
-resource "aws_route53_record" "google_hosted_verification" {
-  zone_id = var.route53_zone_id
-  name    = var.cname_name
-  type    = "CNAME"
-  ttl     = 300
-  records = [var.cname_value]
-}
-
-# MX record to route email to Google Workspace mail servers
-resource "aws_route53_record" "mx_google" {
-  zone_id = var.route53_zone_id
-  name    = var.domain
-  type    = "MX"
-  ttl     = 300
-  records = ["1 SMTP.GOOGLE.COM."]
-}
-
 # Alias A record to route api.findora.nl to the API Gateway custom domain.
 # Ensures frontend can communicate with backend using a clean subdomain.
 resource "aws_route53_record" "api_domain" {
